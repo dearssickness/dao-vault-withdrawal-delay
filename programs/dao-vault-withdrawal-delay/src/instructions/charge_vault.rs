@@ -3,23 +3,17 @@ use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use crate::{constants::*, errors::*, state::*};
 
 #[derive(Accounts)]
-pub struct InitializeAccounts<'info> {
+pub struct ChargeVault<'info> {
     #[account(
-        init,
-        payer = admin,
+        mut,
         seeds = [b"vault", dao_multisig.key().as_ref()],
         bump,
-        token::mint = token_mint,
-        token::authority = authority,
     )]
     pub vault: Account<'info, TokenAccount>,
     
     #[account(
-        init,
-        payer = admin,
         seeds = [b"dao_multisig"],
         bump,
-        space = 8 + (MAXIMUM_SIGNERS * 32) + 1 + 8 + 1,
     )]
     pub dao_multisig: Account<'info, Multisig>,
 
@@ -29,6 +23,9 @@ pub struct InitializeAccounts<'info> {
         bump,
     )]
     pub authority: AccountInfo<'info>,
+    
+    #[account(mut)]
+    pub admin_wallet: Account<'info, TokenAccount>,
 
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -37,9 +34,21 @@ pub struct InitializeAccounts<'info> {
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>
 }
+    
 
-pub fn handler(ctx: Context<InitializeAccounts>) -> Result<()> {
-    let multisig = &mut ctx.accounts.dao_multisig;
-    multisig.initialized = true;
+pub fn handler(ctx: Context<ChargeVault>, amount: u64) -> Result<()> {
+    
+    let token_program = ctx.accounts.token_program.to_account_info();
+    
+    let transfer = token::Transfer {
+        from: ctx.accounts.admin_wallet.to_account_info(),
+        to: ctx.accounts.vault.to_account_info(),
+        authority: ctx.accounts.admin.to_account_info()
+    };
+    
+    let cpi_ctx = CpiContext::new(token_program, transfer);
+
+    token::transfer(cpi_ctx, amount)?;
+
     Ok(())
 }

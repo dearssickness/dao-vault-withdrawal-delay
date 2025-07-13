@@ -1,0 +1,1 @@
+pub const MAXIMUM_SIGNERS: usize = 10;
