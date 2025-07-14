@@ -39,7 +39,5 @@ pub struct InitializeAccounts<'info> {
 }
 
 pub fn handler(ctx: Context<InitializeAccounts>) -> Result<()> {
-    let multisig = &mut ctx.accounts.dao_multisig;
-    multisig.initialized = true;
     Ok(())
 }

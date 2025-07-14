@@ -17,13 +17,6 @@ pub struct ChargeVault<'info> {
     )]
     pub dao_multisig: Account<'info, Multisig>,
 
-    /// CHECK: This account just used to sign transfers from vesting_vault
-    #[account(
-        seeds = [b"authority", token_mint.key().as_ref()],
-        bump,
-    )]
-    pub authority: AccountInfo<'info>,
-    
     #[account(mut)]
     pub admin_wallet: Account<'info, TokenAccount>,
 
@@ -35,7 +28,6 @@ pub struct ChargeVault<'info> {
     pub system_program: Program<'info, System>
 }
     
-
 pub fn handler(ctx: Context<ChargeVault>, amount: u64) -> Result<()> {
     
     let token_program = ctx.accounts.token_program.to_account_info();
