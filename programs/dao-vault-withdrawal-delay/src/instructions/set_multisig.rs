@@ -9,7 +9,9 @@ pub struct SetMultisig<'info> {
         bump,
     )]
     pub dao_multisig: Account<'info, Multisig>,
-    
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
 }
 
 pub fn handler(
