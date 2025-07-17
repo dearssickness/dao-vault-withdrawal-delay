@@ -5,6 +5,7 @@ use crate::{constants::*, errors::*, state::*};
 #[derive(Accounts)]
 pub struct SetMultisig<'info> {
     #[account(
+        mut,
         seeds = [b"dao_multisig"],
         bump,
     )]
@@ -17,7 +18,9 @@ pub struct SetMultisig<'info> {
 pub fn handler(
     ctx: Context<SetMultisig>, 
     signers: Vec<Pubkey>, 
-    threshold: u8
+    recipient: Pubkey, 
+    threshold: u8,
+    delay: u64
 ) -> Result<()> {
 
     require!(
@@ -28,10 +31,13 @@ pub fn handler(
     require!(signers.len() <= MAXIMUM_SIGNERS, MultisigError::TooManySigners);
 
     let multisig = &mut ctx.accounts.dao_multisig;
+    multisig.recipient = recipient;
     multisig.signers = signers;
     multisig.threshold = threshold;
     multisig.approvals = 0;
     multisig.initialized = true;
+    multisig.unlock_at = 0;
+    multisig.delay = delay;
 
     Ok(())
 } 

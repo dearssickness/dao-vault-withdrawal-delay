@@ -5,6 +5,7 @@ use crate::{constants::*, errors::*, state::*};
 #[derive(Accounts)]
 pub struct Approve<'info>{
     #[account(
+        mut,
         seeds = [b"dao_multisig"],
         bump,
     )]
@@ -34,7 +35,10 @@ pub fn handler(ctx: Context<Approve>) -> Result<()> {
 
     let approval_count = multisig.approvals.count_ones() as u8;
     if approval_count >= multisig.threshold {
-        msg!("Threshold met! Action can be executed.");
+        let now = Clock::get()?;
+        let delay = multisig.delay;
+        multisig.unlock_at = now.unix_timestamp + delay as i64;
+        msg!("Threshold met! Action can be executed after {}", &multisig.unlock_at);
     }
 
     Ok(())

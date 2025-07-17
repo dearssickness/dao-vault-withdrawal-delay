@@ -19,7 +19,7 @@ pub struct InitializeAccounts<'info> {
         payer = admin,
         seeds = [b"dao_multisig"],
         bump,
-        space = 8 + (MAXIMUM_SIGNERS * 32) + 1 + 8 + 1,
+        space = 8 + 32 + (MAXIMUM_SIGNERS * 32) + 1 + 8 + 1 + 8 + 8,
     )]
     pub dao_multisig: Account<'info, Multisig>,
 
