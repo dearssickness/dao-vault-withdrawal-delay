@@ -12,13 +12,15 @@ pub struct SetMultisig<'info> {
     pub dao_multisig: Account<'info, Multisig>,
 
     #[account(mut)]
+    pub recipient: Account<'info, TokenAccount>,
+
+    #[account(mut)]
     pub admin: Signer<'info>,
 }
 
 pub fn handler(
     ctx: Context<SetMultisig>, 
     signers: Vec<Pubkey>, 
-    recipient: Pubkey, 
     threshold: u8,
     delay: u64
 ) -> Result<()> {
@@ -31,7 +33,7 @@ pub fn handler(
     require!(signers.len() <= MAXIMUM_SIGNERS, MultisigError::TooManySigners);
 
     let multisig = &mut ctx.accounts.dao_multisig;
-    multisig.recipient = recipient;
+    multisig.recipient = ctx.accounts.recipient.key();
     multisig.signers = signers;
     multisig.threshold = threshold;
     multisig.approvals = 0;
