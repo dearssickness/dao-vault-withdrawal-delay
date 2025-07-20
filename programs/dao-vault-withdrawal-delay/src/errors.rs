@@ -16,4 +16,6 @@ pub enum MultisigError {
     TooManySigners,
     #[msg("Multisig already initialized")]
     AlreadyInitialized,
+    #[msg("Early execute")]
+    EarlyExecute,
 }

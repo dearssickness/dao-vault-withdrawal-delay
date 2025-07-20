@@ -36,6 +36,18 @@ pub struct Execute<'info> {
 
 pub fn handler(ctx: Context<Execute>) -> Result<()> {
     let amount  = ctx.accounts.vault.amount;
+    let dao_multisig  = &ctx.accounts.dao_multisig;
+    let unlock_time = dao_multisig.unlock_at as i64;
+    let clock = Clock::get()?;
+    
+    require!(clock.unix_timestamp > unlock_time, MultisigError::EarlyExecute);
+    
+    // Count approvals in the bitfield
+    let approval_count = dao_multisig.approvals.count_ones() as u8;
+    require!(
+        approval_count >= dao_multisig.threshold,
+        MultisigError::InsufficientSignatures
+    );
 
     let token_mint_key = ctx.accounts.token_mint.key();
 
